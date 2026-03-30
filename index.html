@@ -7,6 +7,7 @@
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <!-- フォント: Mochiy Pop One (日本語), Press Start 2P (8-bit), Roboto Mono (タイマー) -->
     <link href="https://fonts.googleapis.com/css2?family=Mochiy+Pop+One&family=Roboto+Mono:wght@700&family=Press+Start+2P&display=swap" rel="stylesheet">
 
     <style>
@@ -50,7 +51,7 @@
             height: 100%;
             z-index: 2000;
             pointer-events: none;
-            will-change: transform; /* パフォーマンス最適化 */
+            will-change: transform;
         }
 
         .music-toggle {
@@ -117,7 +118,7 @@
             width: 200%;
             height: 200%;
             background: conic-gradient(transparent, var(--neon-pink), transparent, var(--neon-blue), transparent);
-            animation: rotate 6s linear infinite; /* 速度を少し落として負荷軽減 */
+            animation: rotate 6s linear infinite;
             z-index: -1;
             opacity: 0.2;
         }
@@ -362,10 +363,12 @@
 
     <canvas id="canvas-bg"></canvas>
 
+    <!-- 🎵 オーディオタグ -->
     <audio id="bgm" loop preload="auto">
         <source src="maou_short_14_shining_star.mp3" type="audio/mpeg">
     </audio>
 
+    <!-- 🎵 ミュート切り替えボタン -->
     <div class="music-toggle" id="musicToggle" onclick="toggleMusic(event)">
         <span id="musicIcon">🔇</span>
     </div>
@@ -389,7 +392,7 @@
                     <div class="info-item">
                         <span class="icon">📍</span>
                         <span>Loom (松江京店RGBビル 2F)
-                            <span class="note">※近鄰の有料駐車場をご利用ください</span>
+                            <span class="note">※近隣の有料駐車場をご利用ください</span>
                         </span>
                     </div>
                 </div>
@@ -521,19 +524,21 @@
             }
         }
 
+        // ⭐ 流れ星（左上→右下、光の糸を強化）
         class ShootingStar {
             constructor() {
-                this.x = Math.random() * (canvas.width * 0.4);
-                this.y = -50;
+                this.x = Math.random() * canvas.width - 100;
+                this.y = Math.random() * -200 - 50; 
                 this.size = Math.random() * 15 + 15;
-                this.speed = Math.random() * 8 + 10;
-                this.history = [];
+                this.speed = Math.random() * 10 + 12; 
+                this.history = []; 
+                this.maxHistory = 15; 
             }
             update() {
                 this.history.push({x: this.x, y: this.y});
-                if(this.history.length > 8) this.history.shift();
+                if(this.history.length > this.maxHistory) this.history.shift();
                 this.x += this.speed;
-                this.y += this.speed * 0.75;
+                this.y += this.speed * 0.8;
             }
             draw() {
                 if (this.history.length > 1) {
@@ -542,13 +547,15 @@
                     for (let i = 1; i < this.history.length; i++) {
                         ctx.lineTo(this.history[i].x, this.history[i].y);
                     }
-                    ctx.strokeStyle = "rgba(255, 255, 255, 0.3)";
-                    ctx.lineWidth = 1.5;
+                    ctx.strokeStyle = "rgba(255, 255, 255, 0.4)";
+                    ctx.lineWidth = 2;
+                    ctx.lineCap = 'round';
                     ctx.stroke();
                 }
                 ctx.globalAlpha = 1.0;
                 ctx.font = `${this.size}px serif`;
-                ctx.shadowBlur = 10; ctx.shadowColor = "gold";
+                ctx.shadowBlur = 15; 
+                ctx.shadowColor = "gold";
                 ctx.fillText('⭐', this.x, this.y);
                 ctx.shadowBlur = 0;
             }
@@ -585,23 +592,19 @@
             if (musicStarted && !bgm.paused) {
                 const cur = bgm.currentTime;
                 
-                // 🌸 サクラ (上限50個に制限)
                 if (cur >= 9 && sakuras.length < 50) {
                     if (Math.random() < 0.08) sakuras.push(new Sakura());
                 }
 
-                // 00:35 ⭐ 星
-                if (cur >= 35 && cur < 38 && Math.random() < 0.3) {
-                    stars.push(new ShootingStar());
+                if (cur >= 35 && cur < 38) {
+                    if (Math.random() < 0.7) stars.push(new ShootingStar());
                 }
 
-                // 00:47 😸 猫
                 if (cur >= 47 && cur < 50 && Math.random() < 0.2) {
                     for(let i=0; i<3; i++) particles.push(new Particle(Math.random()*canvas.width, Math.random()*canvas.height, '😸'));
                 }
             }
 
-            // 更新と描画を統合して効率化
             sakuras = sakuras.filter(s => {
                 s.update(); s.draw();
                 return s.y < canvas.height + 20;
@@ -614,7 +617,7 @@
 
             stars = stars.filter(s => {
                 s.update(); s.draw();
-                return s.x < canvas.width + 50 && s.y < canvas.height + 50;
+                return s.x < canvas.width + 100 && s.y < canvas.height + 100;
             });
             
             requestAnimationFrame(animate);
