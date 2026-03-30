@@ -50,7 +50,7 @@
             height: 100%;
             z-index: 2000;
             pointer-events: none;
-            transform: translateZ(0); /* GPUアクセラレーション */
+            transform: translateZ(0);
         }
 
         .music-toggle {
@@ -83,13 +83,14 @@
         }
 
         .card {
-            background: rgba(15, 23, 42, 0.85); /* ぼかし負荷軽減のため不透明度を調整 */
-            backdrop-filter: blur(8px); /* 12pxから8pxへ軽減 */
+            background: rgba(15, 23, 42, 0.85); 
+            backdrop-filter: blur(8px); 
             border: 1px solid var(--glass-border);
             border-radius: 24px;
             padding: 1.2rem;
             text-align: center;
             box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
+            position: relative;
             overflow: hidden;
         }
 
@@ -100,7 +101,6 @@
             border-radius: 50%;
         }
 
-        /* 背景の回転エフェクトを軽量化 */
         .card::before {
             content: '';
             position: absolute;
@@ -109,9 +109,9 @@
             width: 200%;
             height: 200%;
             background: conic-gradient(from 0deg, transparent 0%, var(--neon-pink) 25%, transparent 50%, var(--neon-blue) 75%, transparent 100%);
-            animation: rotate 8s linear infinite;
+            animation: rotate 10s linear infinite;
             z-index: -2;
-            opacity: 0.15;
+            opacity: 0.12;
         }
         
         .card::after {
@@ -137,6 +137,7 @@
             display: flex;
             justify-content: center;
             margin-bottom: 0.8rem;
+            min-height: 1.5rem;
         }
         .casual-invite {
             font-size: 1rem;
@@ -147,7 +148,7 @@
             white-space: nowrap;
             border-right: 3px solid var(--neon-pink);
             width: 0;
-            animation: typing 3.5s steps(12, end) infinite, blink-caret .75s step-end infinite;
+            animation: typing 3.5s steps(15, end) infinite, blink-caret .75s step-end infinite;
         }
         @keyframes typing { 0% { width: 0 } 40%, 90% { width: 100% } 100% { width: 0 } }
         @keyframes blink-caret { from, to { border-color: transparent } 50% { border-color: var(--neon-pink); } }
@@ -189,7 +190,6 @@
             text-shadow: 0 0 6px var(--neon-yellow);
             animation: bounce 0.8s infinite alternate;
         }
-
         @keyframes bounce { from { transform: translateY(0); } to { transform: translateY(-4px); } }
 
         .mega-heart-btn {
@@ -216,9 +216,7 @@
             position: relative;
             transform: rotate(-45deg);
         }
-
-        .heart-shape:before,
-        .heart-shape:after {
+        .heart-shape:before, .heart-shape:after {
             content: "";
             background-color: var(--neon-pink);
             border-radius: 50%;
@@ -280,11 +278,7 @@
             z-index: 2; 
         }
 
-        .silhouette-emoji {
-            font-size: 2.2rem;
-            filter: brightness(0); 
-            opacity: 0.8;
-        }
+        .silhouette-emoji { font-size: 2.2rem; filter: brightness(0); opacity: 0.8; }
 
         .map-btn {
             display: block;
@@ -344,7 +338,7 @@
         <div class="card">
             <img src="logo.jpg" alt="Logo" class="company-logo" onerror="this.src='https://via.placeholder.com/80/0f172a/ffffff?text=LOGO'">
             <h1>エンプラ 2025<br>AWARD & 歓迎会</h1>
-            <div class="typing-wrapper"><div class="casual-invite">LET'S PARTY!</div></div>
+            <div class="typing-wrapper"><div class="casual-invite" id="dynamic-msg">LET'S PARTY!</div></div>
 
             <div class="main-info-area">
                 <div class="info-grid">
@@ -378,6 +372,7 @@
         const musicToggle = document.getElementById('musicToggle');
         const musicIcon = document.getElementById('musicIcon');
         const megaBtn = document.getElementById('megaBtn');
+        const dynamicMsg = document.getElementById('dynamic-msg');
         const canvas = document.getElementById('canvas-bg');
         const ctx = canvas.getContext('2d', { alpha: true });
         
@@ -385,6 +380,7 @@
         let particles = [];
         let stars = [];
         let sakuras = [];
+        let ambients = [];
         const cats = ['🐱', '🐈', '🐈‍⬛', '😸'];
 
         function syncMusicUI() {
@@ -430,16 +426,32 @@
         window.addEventListener('resize', resize);
         resize();
 
+        // 🌟 アンビエント（背景の霧のような光）
+        class AmbientSparkle {
+            constructor() {
+                this.x = Math.random() * canvas.width;
+                this.y = canvas.height + 10;
+                this.size = Math.random() * 1.5 + 0.5;
+                this.speedY = Math.random() * 0.4 + 0.1;
+                this.opacity = Math.random() * 0.2 + 0.1;
+            }
+            update() { this.y -= this.speedY; if (this.y < -10) this.y = canvas.height + 10; }
+            draw() {
+                ctx.globalAlpha = this.opacity; ctx.fillStyle = "white";
+                ctx.beginPath(); ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2); ctx.fill();
+            }
+        }
+
         class Particle {
             constructor(x, y, emoji = null) {
                 this.x = x; this.y = y; this.emoji = emoji;
-                this.size = emoji ? 30 : Math.random() * 5 + 2;
-                this.color = `hsl(${Math.random() * 360}, 100%, 70%)`;
-                this.speedX = Math.random() * 10 - 5;
-                this.speedY = Math.random() * -15 - 3;
-                this.gravity = 0.4; this.life = 1.0;
+                this.size = emoji ? 28 : Math.random() * 4 + 2;
+                this.color = `hsl(${Math.random() * 360}, 100%, 75%)`;
+                this.speedX = Math.random() * 8 - 4;
+                this.speedY = Math.random() * -12 - 2;
+                this.gravity = 0.35; this.life = 1.0;
             }
-            update() { this.x += this.speedX; this.speedY += this.gravity; this.y += this.speedY; this.life -= 0.02; }
+            update() { this.x += this.speedX; this.speedY += this.gravity; this.y += this.speedY; this.life -= 0.025; }
             draw() {
                 ctx.globalAlpha = this.life;
                 if (this.emoji) {
@@ -456,13 +468,13 @@
             constructor() {
                 if (Math.random() < 0.5) { this.x = Math.random() * canvas.width * 0.5 - 50; this.y = -50; }
                 else { this.x = -50; this.y = Math.random() * canvas.height * 0.6; }
-                this.size = Math.random() * 10 + 15;
-                this.speed = Math.random() * 8 + 10; 
+                this.size = Math.random() * 8 + 14;
+                this.speed = Math.random() * 8 + 12; 
                 this.history = []; 
             }
             update() {
                 this.history.push({x: this.x, y: this.y});
-                if(this.history.length > 10) this.history.shift();
+                if(this.history.length > 12) this.history.shift();
                 this.x += this.speed; this.y += this.speed * 0.7;
             }
             draw() {
@@ -470,12 +482,10 @@
                     ctx.beginPath();
                     ctx.moveTo(this.history[0].x, this.history[0].y);
                     for (let i = 1; i < this.history.length; i++) ctx.lineTo(this.history[i].x, this.history[i].y);
-                    ctx.strokeStyle = "rgba(255, 255, 255, 0.3)";
+                    ctx.strokeStyle = "rgba(255, 255, 255, 0.4)";
                     ctx.lineWidth = 2; ctx.stroke();
                 }
-                ctx.globalAlpha = 1.0;
-                ctx.font = `${this.size}px serif`;
-                ctx.fillText('⭐', this.x, this.y);
+                ctx.globalAlpha = 1.0; ctx.font = `${this.size}px serif`; ctx.fillText('⭐', this.x, this.y);
             }
         }
 
@@ -483,30 +493,46 @@
             constructor() {
                 this.x = Math.random() * canvas.width; this.y = -20;
                 this.size = Math.random() * 6 + 10;
-                this.speedY = Math.random() * 1.0 + 0.5;
-                this.swing = Math.random() * 1.2;
+                this.speedY = Math.random() * 1.0 + 0.6;
+                this.swing = Math.random() * 1.5;
                 this.angle = Math.random() * Math.PI * 2;
             }
             update() { this.y += this.speedY; this.x += Math.sin(this.y / 40) * this.swing; this.angle += 0.01; }
             draw() {
                 ctx.save();
                 ctx.translate(this.x, this.y); ctx.rotate(this.angle);
-                ctx.globalAlpha = 0.6; ctx.font = `${this.size}px serif`;
+                ctx.globalAlpha = 0.7; ctx.font = `${this.size}px serif`;
                 ctx.fillText('🌸', 0, 0);
                 ctx.restore();
             }
         }
 
+        // 初期生成（数は控えめに）
+        for(let i=0; i<25; i++) ambients.push(new AmbientSparkle());
+
         function animate() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // 🌟 背景スパークル（常に。ただし桜が出ている間は控えめな色調へ）
+            ambients.forEach(a => { a.update(); a.draw(); });
+
             if (musicStarted && !bgm.paused) {
                 const cur = bgm.currentTime;
-                if (cur >= 9 && sakuras.length < 40 && Math.random() < 0.06) sakuras.push(new Sakura());
-                if (cur >= 35 && cur < 38 && Math.random() < 0.6) stars.push(new ShootingStar());
-                if (cur >= 47 && cur < 50 && Math.random() < 0.15) {
+                
+                // 動的メッセージ
+                if (cur < 3) dynamicMsg.innerText = "LET'S PARTY!";
+                else if (cur < 6) dynamicMsg.innerText = "ARE YOU READY?";
+                else if (cur < 9) dynamicMsg.innerText = "WAIT FOR IT...";
+                else dynamicMsg.innerText = "SPRING HAS COME! 🌸";
+
+                // 演出制御
+                if (cur >= 9 && sakuras.length < 40 && Math.random() < 0.07) sakuras.push(new Sakura());
+                if (cur >= 35 && cur < 38 && Math.random() < 0.7) stars.push(new ShootingStar());
+                if (cur >= 47 && cur < 50 && Math.random() < 0.2) {
                     for(let i=0; i<2; i++) particles.push(new Particle(Math.random()*canvas.width, Math.random()*canvas.height, '😸'));
                 }
             }
+
             sakuras = sakuras.filter(s => { s.update(); s.draw(); return s.y < canvas.height + 20; });
             particles = particles.filter(p => { p.update(); p.draw(); return p.life > 0; });
             stars = stars.filter(s => { s.update(); s.draw(); return s.x < canvas.width + 50 && s.y < canvas.height + 50; });
@@ -519,7 +545,7 @@
             startMusic();
             const r = e.target.closest('.mega-heart-btn').getBoundingClientRect();
             const cx = r.left + r.width/2; const cy = r.top + r.height/2;
-            for (let i = 0; i < 30; i++) particles.push(new Particle(cx, cy));
+            for (let i = 0; i < 35; i++) particles.push(new Particle(cx, cy));
             if (Math.random() < 0.2) for (let i = 0; i < 6; i++) particles.push(new Particle(cx, cy, cats[Math.floor(Math.random()*cats.length)]));
         }
 
@@ -530,15 +556,14 @@
             if (Math.random() < 0.1) for (let i = 0; i < 3; i++) particles.push(new Particle(e.clientX, e.clientY, cats[Math.floor(Math.random()*cats.length)]));
         });
 
-        // 3D追従の最適化（スロットリング）
         const cardContainer = document.getElementById('tilt-card');
         let lastMove = 0;
         document.body.addEventListener('mousemove', (e) => {
             const now = Date.now();
-            if (now - lastMove < 30) return; // 30ms間隔に制限
+            if (now - lastMove < 35) return;
             lastMove = now;
-            const x = (window.innerWidth / 2 - e.pageX) / 40;
-            const y = (window.innerHeight / 2 - e.pageY) / 40;
+            const x = (window.innerWidth / 2 - e.pageX) / 45;
+            const y = (window.innerHeight / 2 - e.pageY) / 45;
             cardContainer.style.transform = `rotateY(${x}deg) rotateX(${y}deg)`;
         });
     </script>
