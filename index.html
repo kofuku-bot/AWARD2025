@@ -7,6 +7,7 @@
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <!-- フォント: Mochiy Pop One (日本語), Press Start 2P (8-bit), Roboto Mono (タイマー/LED) -->
     <link href="https://fonts.googleapis.com/css2?family=Mochiy+Pop+One&family=Roboto+Mono:wght@700&family=Press+Start+2P&display=swap" rel="stylesheet">
 
     <style>
@@ -18,6 +19,7 @@
             --glass-bg: rgba(255, 255, 255, 0.1);
             --glass-border: rgba(255, 255, 255, 0.2);
             --teaser-bg: #1e293b;
+            --led-bg: #000000;
         }
 
         * {
@@ -30,8 +32,8 @@
         body {
             background-color: var(--bg-dark);
             background-image: 
-                radial-gradient(circle at 10% 20%, rgba(5, 217, 232, 0.1) 0%, transparent 40%),
-                radial-gradient(circle at 90% 80%, rgba(255, 42, 109, 0.1) 0%, transparent 40%);
+                radial-gradient(circle at 10% 20%, rgba(5, 217, 232, 0.15) 0%, transparent 40%),
+                radial-gradient(circle at 90% 80%, rgba(255, 42, 109, 0.15) 0%, transparent 40%);
             font-family: 'Mochiy Pop One', sans-serif;
             height: 100dvh; 
             overflow: hidden;
@@ -127,29 +129,55 @@
 
         h1 {
             font-size: 1.2rem; 
-            margin-bottom: 0.2rem;
+            margin-bottom: 0.6rem;
             background: linear-gradient(90deg, var(--neon-blue), #fff, var(--neon-pink));
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
         }
 
+        /* 📟 電光掲示板（LEDティッカー）風デザイン */
         .typing-wrapper {
             display: flex;
             justify-content: center;
-            margin-bottom: 0.8rem;
-            min-height: 1.5rem;
+            align-items: center;
+            margin-bottom: 1rem;
+            background: var(--led-bg);
+            border: 2px solid #333;
+            border-radius: 8px;
+            padding: 8px 12px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: inset 0 0 15px rgba(0,0,0,1), 0 0 10px rgba(255, 42, 109, 0.2);
+            min-height: 44px;
         }
+        
+        /* LEDの網目テクスチャ */
+        .typing-wrapper::before {
+            content: "";
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), 
+                        linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+            background-size: 100% 3px, 3px 100%;
+            pointer-events: none;
+            z-index: 2;
+        }
+
         .casual-invite {
-            font-size: 1rem;
+            font-size: 1.1rem;
             color: var(--neon-pink);
-            text-shadow: 0 0 8px rgba(255, 42, 109, 0.6);
+            text-shadow: 0 0 12px var(--neon-pink);
             font-family: 'Roboto Mono', monospace;
+            font-weight: 900;
             overflow: hidden;
             white-space: nowrap;
             border-right: 3px solid var(--neon-pink);
             width: 0;
             animation: typing 3.5s steps(15, end) infinite, blink-caret .75s step-end infinite;
+            z-index: 1;
+            letter-spacing: 1px;
         }
+
         @keyframes typing { 0% { width: 0 } 40%, 90% { width: 100% } 100% { width: 0 } }
         @keyframes blink-caret { from, to { border-color: transparent } 50% { border-color: var(--neon-pink); } }
 
@@ -338,7 +366,11 @@
         <div class="card">
             <img src="logo.jpg" alt="Logo" class="company-logo" onerror="this.src='https://via.placeholder.com/80/0f172a/ffffff?text=LOGO'">
             <h1>エンプラ 2025<br>AWARD & 歓迎会</h1>
-            <div class="typing-wrapper"><div class="casual-invite" id="dynamic-msg">LET'S PARTY!</div></div>
+            
+            <!-- 電光掲示板風メッセージエリア -->
+            <div class="typing-wrapper">
+                <div class="casual-invite" id="dynamic-msg">LET'S PARTY!</div>
+            </div>
 
             <div class="main-info-area">
                 <div class="info-grid">
@@ -426,7 +458,7 @@
         window.addEventListener('resize', resize);
         resize();
 
-        // 🌟 アンビエント（背景の霧のような光）
+        // 背景スパークル
         class AmbientSparkle {
             constructor() {
                 this.x = Math.random() * canvas.width;
@@ -507,25 +539,29 @@
             }
         }
 
-        // 初期生成（数は控えめに）
         for(let i=0; i<25; i++) ambients.push(new AmbientSparkle());
 
         function animate() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
-            
-            // 🌟 背景スパークル（常に。ただし桜が出ている間は控えめな色調へ）
             ambients.forEach(a => { a.update(); a.draw(); });
 
             if (musicStarted && !bgm.paused) {
                 const cur = bgm.currentTime;
                 
-                // 動的メッセージ
-                if (cur < 3) dynamicMsg.innerText = "LET'S PARTY!";
-                else if (cur < 6) dynamicMsg.innerText = "ARE YOU READY?";
-                else if (cur < 9) dynamicMsg.innerText = "WAIT FOR IT...";
-                else dynamicMsg.innerText = "SPRING HAS COME! 🌸";
+                // 動的メッセージの更新
+                let nextMsg = "";
+                if (cur < 3) nextMsg = "LET'S PARTY!";
+                else if (cur < 6) nextMsg = "ARE YOU READY?";
+                else if (cur < 9) nextMsg = "WAIT FOR IT...";
+                else nextMsg = "SPRING HAS COME! 🌸";
+                
+                if (dynamicMsg.innerText !== nextMsg) {
+                    dynamicMsg.innerText = nextMsg;
+                    // メッセージが変わった時に少し色を変える演出
+                    dynamicMsg.style.color = (cur >= 9) ? "var(--neon-yellow)" : "var(--neon-pink)";
+                    dynamicMsg.style.textShadow = (cur >= 9) ? "0 0 12px var(--neon-yellow)" : "0 0 12px var(--neon-pink)";
+                }
 
-                // 演出制御
                 if (cur >= 9 && sakuras.length < 40 && Math.random() < 0.07) sakuras.push(new Sakura());
                 if (cur >= 35 && cur < 38 && Math.random() < 0.7) stars.push(new ShootingStar());
                 if (cur >= 47 && cur < 50 && Math.random() < 0.2) {
