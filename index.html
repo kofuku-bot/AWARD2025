@@ -1,0 +1,653 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>エンプラ 2025年度AWARD＆歓迎会</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Mochiy+Pop+One&family=Roboto+Mono:wght@700&family=Press+Start+2P&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --neon-pink: #ff2a6d;
+            --neon-blue: #05d9e8;
+            --neon-yellow: #f9c80e;
+            --bg-dark: #0f172a;
+            --glass-bg: rgba(255, 255, 255, 0.1);
+            --glass-border: rgba(255, 255, 255, 0.2);
+            --teaser-bg: #1e293b;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            background-image: 
+                radial-gradient(circle at 10% 20%, rgba(5, 217, 232, 0.15) 0%, transparent 40%),
+                radial-gradient(circle at 90% 80%, rgba(255, 42, 109, 0.15) 0%, transparent 40%);
+            font-family: 'Mochiy Pop One', sans-serif;
+            height: 100dvh; 
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            perspective: 1000px; 
+            color: white;
+        }
+
+        #canvas-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 2000;
+            pointer-events: none;
+            will-change: transform; /* パフォーマンス最適化 */
+        }
+
+        .music-toggle {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 2100;
+            background: var(--glass-bg);
+            border: 2px solid var(--neon-blue);
+            color: var(--neon-blue);
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 0 15px rgba(5, 217, 232, 0.4);
+            transition: all 0.3s;
+            font-size: 1.5rem;
+        }
+        .music-toggle.playing {
+            box-shadow: 0 0 25px var(--neon-blue);
+            background: rgba(5, 217, 232, 0.2);
+        }
+
+        .card-container {
+            position: relative;
+            z-index: 10;
+            width: 92%;
+            max-width: 480px;
+            transform-style: preserve-3d;
+            transition: transform 0.1s ease-out;
+            will-change: transform;
+        }
+
+        .card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            padding: 1.2rem;
+            text-align: center;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+            position: relative;
+            overflow: hidden;
+            transform: translateZ(20px);
+        }
+
+        .company-logo {
+            max-width: 90px;
+            display: block;
+            margin: 0 auto 0.4rem;
+            border-radius: 50%;
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: conic-gradient(transparent, var(--neon-pink), transparent, var(--neon-blue), transparent);
+            animation: rotate 6s linear infinite; /* 速度を少し落として負荷軽減 */
+            z-index: -1;
+            opacity: 0.2;
+        }
+        
+        .card::after {
+            content: '';
+            position: absolute;
+            inset: 3px;
+            background: rgba(15, 23, 42, 0.92); 
+            border-radius: 22px;
+            z-index: -1;
+        }
+
+        @keyframes rotate { 100% { transform: rotate(360deg); } }
+
+        h1 {
+            font-size: 1.3rem; 
+            margin-bottom: 0.2rem;
+            background: linear-gradient(90deg, var(--neon-blue), #fff, var(--neon-pink));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .typing-wrapper {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 0.8rem;
+        }
+        .casual-invite {
+            font-size: 1.1rem;
+            color: var(--neon-pink);
+            text-shadow: 0 0 10px rgba(255, 42, 109, 0.8);
+            font-family: 'Roboto Mono', monospace;
+            overflow: hidden;
+            white-space: nowrap;
+            border-right: 3px solid var(--neon-pink);
+            width: 0;
+            animation: typing 3.5s steps(12, end) infinite, blink-caret .75s step-end infinite;
+        }
+        @keyframes typing {
+            0% { width: 0 }
+            40%, 90% { width: 100% }
+            100% { width: 0 }
+        }
+        @keyframes blink-caret {
+            from, to { border-color: transparent }
+            50% { border-color: var(--neon-pink); }
+        }
+
+        .main-info-area {
+            display: flex;
+            align-items: stretch;
+            gap: 12px;
+            margin-bottom: 1rem;
+        }
+
+        .info-grid {
+            flex: 1;
+            display: grid;
+            gap: 8px;
+            text-align: left;
+            background: rgba(255, 255, 255, 0.05);
+            padding: 12px 10px;
+            border-radius: 16px;
+            font-size: 0.8rem;
+        }
+
+        .info-item { display: flex; align-items: flex-start; }
+        .icon { margin-right: 8px; width: 20px; text-align: center; }
+        .note { display: block; font-size: 0.65rem; color: #aaa; margin-top: 3px; }
+
+        .btn-container {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .tap-label {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 0.75rem;
+            color: var(--neon-yellow);
+            text-shadow: 0 0 8px var(--neon-yellow);
+            animation: bounce 0.8s infinite alternate;
+            letter-spacing: 1px;
+        }
+
+        @keyframes bounce {
+            from { transform: translateY(0); }
+            to { transform: translateY(-4px); }
+        }
+
+        .mega-heart-btn {
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px solid var(--neon-blue);
+            cursor: pointer;
+            width: 75px;
+            height: 75px;
+            border-radius: 16px;
+            position: relative;
+            z-index: 110;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+            box-shadow: 0 0 10px rgba(5, 217, 232, 0.3);
+            backdrop-filter: blur(5px);
+        }
+
+        .heart-shape {
+            background-color: var(--neon-pink);
+            display: inline-block;
+            height: 25px;
+            width: 25px;
+            position: relative;
+            transform: rotate(-45deg);
+            box-shadow: 0 0 10px rgba(255, 42, 109, 0.5);
+        }
+
+        .heart-shape:before,
+        .heart-shape:after {
+            content: "";
+            background-color: var(--neon-pink);
+            border-radius: 50%;
+            height: 25px;
+            width: 25px;
+            position: absolute;
+        }
+
+        .heart-shape:before { top: -13px; left: 0; }
+        .heart-shape:after { left: 13px; top: 0; }
+
+        .mega-heart-btn.heartbeat-active .heart-shape {
+            animation: heart-pulse 1.1s infinite ease-in-out;
+        }
+
+        @keyframes heart-pulse {
+            0% { transform: rotate(-45deg) scale(1); }
+            14% { transform: rotate(-45deg) scale(1.35); }
+            28% { transform: rotate(-45deg) scale(1); }
+            42% { transform: rotate(-45deg) scale(1.35); }
+            70% { transform: rotate(-45deg) scale(1); }
+        }
+
+        .mega-heart-btn:active {
+            transform: scale(0.9) translateY(2px);
+        }
+
+        .teaser-box {
+            background: var(--teaser-bg);
+            border: 2px solid var(--neon-blue);
+            border-radius: 12px;
+            padding: 15px 5px;
+            margin-bottom: 1rem;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            min-height: 95px;
+        }
+
+        .teaser-bg-title {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 3.2rem; 
+            font-family: 'Press Start 2P', cursive;
+            color: var(--neon-blue);
+            opacity: 0.15; 
+            text-shadow: 0 0 15px var(--neon-blue);
+            white-space: nowrap;
+            z-index: 1;
+            pointer-events: none;
+            letter-spacing: 5px;
+            width: 100%;
+            text-align: center;
+        }
+
+        .shadow-container {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            position: relative;
+            z-index: 2; 
+        }
+
+        .silhouette-emoji {
+            font-size: 2.6rem;
+            filter: brightness(0); 
+            opacity: 0.85;
+            text-shadow: 0 0 2px rgba(255, 255, 255, 0.2);
+        }
+
+        .map-btn {
+            display: block;
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, #00d2ff 0%, #3a7bd5 100%);
+            border: 2px solid var(--neon-blue);
+            color: white;
+            text-decoration: none;
+            border-radius: 16px;
+            font-weight: bold;
+            font-size: 1rem;
+            margin-bottom: 1.2rem;
+            position: relative;
+            z-index: 110;
+            box-shadow: 0 0 20px rgba(5, 217, 232, 0.5);
+            transition: all 0.3s;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+        }
+
+        .countdown-box {
+            background: rgba(0, 0, 0, 0.4);
+            border-radius: 16px;
+            padding: 10px;
+            border: 1px solid var(--neon-blue);
+        }
+        .countdown-timer {
+            font-family: 'Roboto Mono', monospace;
+            font-size: 1.4rem;
+            font-weight: bold;
+            display: flex;
+            justify-content: center;
+            gap: 4px;
+        }
+        .unit { font-size: 0.65rem; align-self: flex-end; margin-bottom: 4px; opacity: 0.7; }
+        
+        .message { 
+            margin-top: 14px; 
+            font-size: 0.95rem;
+            font-weight: bold;
+            color: var(--neon-yellow);
+            text-shadow: 0 0 10px rgba(249, 200, 14, 0.6);
+        }
+    </style>
+</head>
+<body>
+
+    <canvas id="canvas-bg"></canvas>
+
+    <audio id="bgm" loop preload="auto">
+        <source src="maou_short_14_shining_star.mp3" type="audio/mpeg">
+    </audio>
+
+    <div class="music-toggle" id="musicToggle" onclick="toggleMusic(event)">
+        <span id="musicIcon">🔇</span>
+    </div>
+
+    <div class="card-container" id="tilt-card">
+        <div class="card">
+            <img src="logo.jpg" alt="Logo" class="company-logo" onerror="this.src='https://via.placeholder.com/100/0f172a/ffffff?text=LOGO'">
+            
+            <h1>エンプラ 2025<br>AWARD & 歓迎会</h1>
+            
+            <div class="typing-wrapper">
+                <div class="casual-invite">LET'S PARTY!</div>
+            </div>
+
+            <div class="main-info-area">
+                <div class="info-grid">
+                    <div class="info-item">
+                        <span class="icon">📅</span>
+                        <span>3月31日(火) 19:00 START</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="icon">📍</span>
+                        <span>Loom (松江京店RGBビル 2F)
+                            <span class="note">※近鄰の有料駐車場をご利用ください</span>
+                        </span>
+                    </div>
+                </div>
+                <div class="btn-container">
+                    <div class="tap-label">TAP!</div>
+                    <button id="megaBtn" class="mega-heart-btn" onclick="triggerMegaParty(event)">
+                        <div class="heart-shape"></div>
+                    </button>
+                </div>
+            </div>
+
+            <div class="teaser-box">
+                <div class="teaser-bg-title">？？？？？</div>
+                <div class="shadow-container">
+                    <span class="silhouette-emoji">👤</span>
+                    <span class="silhouette-emoji">👤</span>
+                    <span class="silhouette-emoji">👤</span>
+                    <span class="silhouette-emoji">👤</span>
+                </div>
+            </div>
+
+            <a href="https://www.google.com/maps/search/?api=1&query=Loom+松江市末次本町46" target="_blank" class="map-btn">
+                会場へＧｏ 🏃💨✨
+            </a>
+
+            <div class="countdown-box">
+                <div style="font-size: 0.65rem; color: var(--neon-blue); margin-bottom: 3px;">TIME UNTIL START 🥂</div>
+                <div class="countdown-timer" id="timer">00d 00h 00m 00s</div>
+            </div>
+            
+            <p class="message">終了後、会場の片づけにご協力をお願いいたします🧹</p>
+        </div>
+    </div>
+
+    <script>
+        const bgm = document.getElementById('bgm');
+        const musicToggle = document.getElementById('musicToggle');
+        const musicIcon = document.getElementById('musicIcon');
+        const megaBtn = document.getElementById('megaBtn');
+        
+        let musicStarted = false;
+        let playPromise = null;
+
+        function syncMusicUI() {
+            if (bgm.paused) {
+                musicToggle.classList.remove('playing');
+                megaBtn.classList.remove('heartbeat-active');
+                musicIcon.innerText = '🔇';
+            } else {
+                musicToggle.classList.add('playing');
+                megaBtn.classList.add('heartbeat-active');
+                musicIcon.innerText = '🎵';
+            }
+        }
+
+        async function startMusic() {
+            if (!musicStarted) {
+                try {
+                    playPromise = bgm.play();
+                    if (playPromise !== undefined) {
+                        await playPromise;
+                        musicStarted = true;
+                        syncMusicUI();
+                    }
+                } catch (err) {
+                    console.log("Audio play blocked");
+                }
+            }
+        }
+
+        async function toggleMusic(e) {
+            e.stopPropagation();
+            if (!musicStarted) { await startMusic(); return; }
+            if (bgm.paused) { bgm.play(); } else { bgm.pause(); }
+            syncMusicUI();
+        }
+
+        function updateCountdown() {
+            const target = new Date('2026-03-31T19:00:00').getTime();
+            const now = new Date().getTime();
+            const d = target - now;
+            if (d < 0) { document.getElementById('timer').innerHTML = "PARTY TIME! 🎉"; return; }
+            const pad = (n) => n < 10 ? '0' + n : n;
+            document.getElementById('timer').innerHTML = 
+                `${pad(Math.floor(d / 86400000))}d ` +
+                `${pad(Math.floor((d % 86400000) / 3600000))}h ` +
+                `${pad(Math.floor((d % 3600000) / 60000))}m ` +
+                `${pad(Math.floor((d % 60000) / 1000))}s`;
+        }
+        setInterval(updateCountdown, 1000);
+        updateCountdown();
+
+        const canvas = document.getElementById('canvas-bg');
+        const ctx = canvas.getContext('2d', { alpha: true });
+        let particles = [];
+        let stars = [];
+        let sakuras = [];
+        const cats = ['🐱', '🐈', '🐈‍⬛', '😸'];
+
+        function resize() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resize);
+        resize();
+
+        class Particle {
+            constructor(x, y, emoji = null) {
+                this.x = x; this.y = y; this.emoji = emoji;
+                this.size = emoji ? 35 : Math.random() * 6 + 3;
+                this.color = `hsl(${Math.random() * 360}, 100%, 65%)`;
+                this.speedX = Math.random() * 12 - 6;
+                this.speedY = Math.random() * -18 - 4;
+                this.gravity = 0.45; this.life = 1.0;
+            }
+            update() {
+                this.x += this.speedX; this.speedY += this.gravity; this.y += this.speedY; 
+                this.life -= 0.016;
+            }
+            draw() {
+                ctx.globalAlpha = this.life;
+                if (this.emoji) {
+                    ctx.font = `${this.size}px serif`;
+                    ctx.fillText(this.emoji, this.x, this.y);
+                } else {
+                    ctx.fillStyle = this.color;
+                    ctx.beginPath(); ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2); ctx.fill();
+                }
+            }
+        }
+
+        class ShootingStar {
+            constructor() {
+                this.x = Math.random() * (canvas.width * 0.4);
+                this.y = -50;
+                this.size = Math.random() * 15 + 15;
+                this.speed = Math.random() * 8 + 10;
+                this.history = [];
+            }
+            update() {
+                this.history.push({x: this.x, y: this.y});
+                if(this.history.length > 8) this.history.shift();
+                this.x += this.speed;
+                this.y += this.speed * 0.75;
+            }
+            draw() {
+                if (this.history.length > 1) {
+                    ctx.beginPath();
+                    ctx.moveTo(this.history[0].x, this.history[0].y);
+                    for (let i = 1; i < this.history.length; i++) {
+                        ctx.lineTo(this.history[i].x, this.history[i].y);
+                    }
+                    ctx.strokeStyle = "rgba(255, 255, 255, 0.3)";
+                    ctx.lineWidth = 1.5;
+                    ctx.stroke();
+                }
+                ctx.globalAlpha = 1.0;
+                ctx.font = `${this.size}px serif`;
+                ctx.shadowBlur = 10; ctx.shadowColor = "gold";
+                ctx.fillText('⭐', this.x, this.y);
+                ctx.shadowBlur = 0;
+            }
+        }
+
+        class Sakura {
+            constructor() {
+                this.x = Math.random() * canvas.width;
+                this.y = -20;
+                this.size = Math.random() * 8 + 12;
+                this.speedY = Math.random() * 1.2 + 0.8;
+                this.swing = Math.random() * 1.5;
+                this.angle = Math.random() * Math.PI * 2;
+            }
+            update() {
+                this.y += this.speedY;
+                this.x += Math.sin(this.y / 40) * this.swing;
+                this.angle += 0.015;
+            }
+            draw() {
+                ctx.save();
+                ctx.translate(this.x, this.y);
+                ctx.rotate(this.angle);
+                ctx.globalAlpha = 0.7;
+                ctx.font = `${this.size}px serif`;
+                ctx.fillText('🌸', 0, 0);
+                ctx.restore();
+            }
+        }
+
+        function animate() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            if (musicStarted && !bgm.paused) {
+                const cur = bgm.currentTime;
+                
+                // 🌸 サクラ (上限50個に制限)
+                if (cur >= 9 && sakuras.length < 50) {
+                    if (Math.random() < 0.08) sakuras.push(new Sakura());
+                }
+
+                // 00:35 ⭐ 星
+                if (cur >= 35 && cur < 38 && Math.random() < 0.3) {
+                    stars.push(new ShootingStar());
+                }
+
+                // 00:47 😸 猫
+                if (cur >= 47 && cur < 50 && Math.random() < 0.2) {
+                    for(let i=0; i<3; i++) particles.push(new Particle(Math.random()*canvas.width, Math.random()*canvas.height, '😸'));
+                }
+            }
+
+            // 更新と描画を統合して効率化
+            sakuras = sakuras.filter(s => {
+                s.update(); s.draw();
+                return s.y < canvas.height + 20;
+            });
+
+            particles = particles.filter(p => {
+                p.update(); p.draw();
+                return p.life > 0;
+            });
+
+            stars = stars.filter(s => {
+                s.update(); s.draw();
+                return s.x < canvas.width + 50 && s.y < canvas.height + 50;
+            });
+            
+            requestAnimationFrame(animate);
+        }
+        animate();
+
+        function triggerMegaParty(e) {
+            e.stopPropagation();
+            startMusic();
+            const r = e.target.closest('.mega-heart-btn').getBoundingClientRect();
+            const cx = r.left + r.width/2;
+            const cy = r.top + r.height/2;
+            for (let i = 0; i < 40; i++) particles.push(new Particle(cx, cy));
+            if (Math.random() < 0.25) {
+                for (let i = 0; i < 8; i++) particles.push(new Particle(cx, cy, cats[Math.floor(Math.random()*cats.length)]));
+            }
+        }
+
+        document.addEventListener('pointerdown', (e) => {
+            if (e.target.closest('button, a, .music-toggle')) return;
+            startMusic();
+            for (let i = 0; i < 20; i++) particles.push(new Particle(e.clientX, e.clientY));
+            if (Math.random() < 0.15) {
+                for (let i = 0; i < 4; i++) particles.push(new Particle(e.clientX, e.clientY, cats[Math.floor(Math.random()*cats.length)]));
+            }
+        });
+
+        const cardContainer = document.getElementById('tilt-card');
+        document.body.addEventListener('mousemove', (e) => {
+            const x = (window.innerWidth / 2 - e.pageX) / 35;
+            const y = (window.innerHeight / 2 - e.pageY) / 35;
+            cardContainer.style.transform = `rotateY(${x}deg) rotateX(${y}deg)`;
+        });
+    </script>
+</body>
+</html>
