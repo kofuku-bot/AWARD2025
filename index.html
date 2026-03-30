@@ -524,13 +524,20 @@
             }
         }
 
-        // ⭐ 流れ星（左上→右下、光の糸を強化）
+        // ⭐ 流れ星（全体に広がるように調整）
         class ShootingStar {
             constructor() {
-                this.x = Math.random() * canvas.width - 100;
-                this.y = Math.random() * -200 - 50; 
-                this.size = Math.random() * 15 + 15;
-                this.speed = Math.random() * 10 + 12; 
+                // 画面上部だけでなく、左側からも発生するように
+                if (Math.random() < 0.5) {
+                    this.x = Math.random() * canvas.width * 0.5 - 50; // 左半分〜画面外
+                    this.y = -50; // 上端から
+                } else {
+                    this.x = -50; // 左端から
+                    this.y = Math.random() * canvas.height * 0.6; // 中段くらいまで
+                }
+                
+                this.size = Math.random() * 12 + 15;
+                this.speed = Math.random() * 8 + 12; 
                 this.history = []; 
                 this.maxHistory = 15; 
             }
@@ -538,7 +545,7 @@
                 this.history.push({x: this.x, y: this.y});
                 if(this.history.length > this.maxHistory) this.history.shift();
                 this.x += this.speed;
-                this.y += this.speed * 0.8;
+                this.y += this.speed * 0.7; // 斜め右下へ
             }
             draw() {
                 if (this.history.length > 1) {
@@ -596,8 +603,9 @@
                     if (Math.random() < 0.08) sakuras.push(new Sakura());
                 }
 
+                // 00:35 ⭐ 星 (確率を0.8に上げ、画面全体に出るように)
                 if (cur >= 35 && cur < 38) {
-                    if (Math.random() < 0.7) stars.push(new ShootingStar());
+                    if (Math.random() < 0.8) stars.push(new ShootingStar());
                 }
 
                 if (cur >= 47 && cur < 50 && Math.random() < 0.2) {
@@ -617,7 +625,7 @@
 
             stars = stars.filter(s => {
                 s.update(); s.draw();
-                return s.x < canvas.width + 100 && s.y < canvas.height + 100;
+                return s.x < canvas.width + 50 && s.y < canvas.height + 50;
             });
             
             requestAnimationFrame(animate);
